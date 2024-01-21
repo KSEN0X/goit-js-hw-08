@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+  |============================
+  | Gallery items
+  |============================
+*/
 const images = [
   {
     preview:
@@ -66,7 +71,14 @@ const images = [
   },
 ];
 
-const markup = images.reduce(
+/**
+  |==================================
+  | DOM element and add markup
+  |==================================
+*/
+const galleryImg = document.querySelector(".gallery");
+
+galleryImg.innerHTML = images.reduce(
   (html, { preview, original, description }) =>
     html +
     `<li class="gallery-item">
@@ -81,38 +93,50 @@ const markup = images.reduce(
   ""
 );
 
-const galleryImg = document.querySelector(".gallery");
-galleryImg.innerHTML = markup;
-
-let modal;
-function escKeyPress(event) {
-  if (event.code === "Escape") {
-    modal.close();
-  }
-}
-
+/**
+  |========================================================================================================
+  | We attach an event handler to ul.gallery and run the function to open the basicLightbox modal window
+  |========================================================================================================
+*/
 galleryImg.addEventListener("click", clickImg);
 
-function clickImg(event) {
-  event.preventDefault();
-  const imgSource = event.target.dataset.source;
-  const description = event.target.alt;
+let modal = null; //variable that is used in the clickImg function, we place it in the global scope to have access to it
 
-  if (imgSource && event.target.nodeName === "IMG") {
-    console.log(imgSource);
+function clickImg(event) {
+  event.preventDefault(); // Preventing standard behavior (page reload)
+  const imgSource = event.target.dataset.source; // getting a big picture
+  const description = event.target.alt; // getting descriptions for pictures
+
+  if (event.currentTarget === event.target) {
+    return;
+  } //checking whether the list element itself was clicked
+
+  {
     modal = basicLightbox.create(
+      //create an instance of the modal window class
       `
-        <img src="${imgSource}" alt="${description}" />`,
+        <img src="${imgSource}" alt="${description}" />`, //insert a link to a large image and description
       {
         onShow: (modal) => {
           window.addEventListener("keydown", escKeyPress);
-        },
+        }, //the onShow option, according to the documentation, will perform the action of opening the modal window, setting the “key click” event and the escKeyPress function—pressing the Escape key
         onClose: (modal) => {
           window.removeEventListener("keydown", escKeyPress);
-        },
+        }, //the onClose option, according to the documentation, will perform actions until the modal window is closed, remove the “key click” event and the escKeyPress function - pressing the Escape key
       }
     );
-    modal.show();
+    modal.show(); // The show() option according to the documentation shows a modal window
   }
   return;
+}
+
+/**
+  |=================================================================
+  | Function when pressing the Escape key, the modal window closes
+  |=================================================================
+*/
+function escKeyPress(event) {
+  if (event.code === "Escape") {
+    modal.close();
+  } 
 }
